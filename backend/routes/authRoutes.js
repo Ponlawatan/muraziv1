@@ -12,7 +12,5 @@ router.post('/login', authController.login);
 // Route สำหรับ Logout
 router.post('/logout', authController.logout);
 
-// Route สำหรับ Verify Email
-router.get('/verify/:token', authController.verifyEmail);
 
 module.exports = router;
