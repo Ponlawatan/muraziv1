@@ -12,6 +12,7 @@ import 'package:murazi_dev/typecatalogdetail/lottery.dart';
 import 'package:murazi_dev/typecatalogdetail/family.dart';
 import 'package:murazi_dev/models/place.dart';
 import 'package:murazi_dev/services/place_service.dart';
+import 'package:murazi_dev/placedetail.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -222,39 +223,49 @@ class _MuraziHomePageState extends State<HomePage> {
   }
 
   Widget _buildPlaceContainer(double screenWidth, Place place) {
-    return Container(
-      width: screenWidth * 0.96,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(
-          color: const Color.fromARGB(255, 255, 0, 0),
-        ),
-        image: DecorationImage(
-          image: NetworkImage(place.bannerImage),
-          fit: BoxFit.cover,
-        ),
-      ),
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            place.name,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PlaceDetailPage(place: place),
           ),
-          Text(
-            place.categories.join(', '),
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-            ),
+        );
+      },
+      child: Container(
+        width: screenWidth * 0.96,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: const Color.fromARGB(255, 255, 0, 0),
           ),
-        ],
+          image: DecorationImage(
+            image: NetworkImage(place.bannerImage),
+            fit: BoxFit.cover,
+          ),
+        ),
+        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              place.name,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              place.categories.join(', '),
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -379,41 +390,6 @@ class _MuraziHomePageState extends State<HomePage> {
   }
 
   Widget _PlaceSlidePreviewMini() {
-    final List<Map<String, String>> items = [
-      {
-        'image': 'assets/image1.png',
-        'label': 'สถานที่ 1',
-      },
-      {
-        'image': 'assets/image2.png',
-        'label': 'สถานที่ 2',
-      },
-      {
-        'image': 'assets/image3.png',
-        'label': 'สถานที่ 3',
-      },
-      {
-        'image': 'assets/image4.png',
-        'label': 'สถานที่ 4',
-      },
-      {
-        'image': 'assets/image5.png',
-        'label': 'สถานที่ 5',
-      },
-      {
-        'image': 'assets/image6.png',
-        'label': 'สถานที่ 6',
-      },
-      {
-        'image': 'assets/image7.png',
-        'label': 'สถานที่ 7',
-      },
-      {
-        'image': 'assets/image8.png',
-        'label': 'สถานที่ 8',
-      },
-    ];
-
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Column(
@@ -431,52 +407,86 @@ class _MuraziHomePageState extends State<HomePage> {
             ),
           ),
           SizedBox(height: 10),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: items.map((item) {
-                return Padding(
-                  padding: const EdgeInsets.only(right: 10),
-                  child: _buildBoxItem(
-                    item['image']!,
-                    item['label']!,
+          _places.isEmpty
+              ? Center(child: CircularProgressIndicator())
+              : SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: _getRandomPlaces(8).map((place) {
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    PlaceDetailPage(place: place),
+                              ),
+                            );
+                          },
+                          child: _buildRecommendedPlaceItem(place),
+                        ),
+                      );
+                    }).toList(),
                   ),
-                );
-              }).toList(),
-            ),
-          ),
+                ),
         ],
       ),
     );
   }
 
-  Widget _buildBoxItem(String imagePath, String label) {
+  Widget _buildRecommendedPlaceItem(Place place) {
     return Column(
       children: [
         Container(
           width: 120,
-          height: 230,
+          height: 160,
           decoration: BoxDecoration(
             color: Colors.grey[300],
             borderRadius: BorderRadius.circular(8),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.2),
+                blurRadius: 4,
+                offset: Offset(0, 2),
+              ),
+            ],
             image: DecorationImage(
-              image: AssetImage(imagePath),
+              image: NetworkImage(place.bannerImage),
               fit: BoxFit.cover,
+              onError: (error, stackTrace) {
+                print('Error loading image: $error');
+              },
             ),
           ),
         ),
         SizedBox(height: 8),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: const Color.fromARGB(255, 255, 0, 0),
+        SizedBox(
+          width: 120,
+          child: Text(
+            place.name,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: const Color.fromARGB(255, 255, 0, 0),
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-          textAlign: TextAlign.center,
         ),
       ],
     );
+  }
+
+  List<Place> _getRandomPlaces(int count) {
+    if (_places.isEmpty) return [];
+    List<Place> placesCopy = List.from(_places);
+    placesCopy.shuffle();
+    return placesCopy
+        .take(count > placesCopy.length ? placesCopy.length : count)
+        .toList();
   }
 
   Widget _buildBottomNavigationBar() {

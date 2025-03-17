@@ -190,8 +190,21 @@ exports.uploadProfileImage = async (req, res) => {
             });
         }
 
+        // ตรวจสอบขนาดข้อมูล base64
+        const base64WithoutPrefix = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+        const fileSize = Buffer.byteLength(base64WithoutPrefix, 'base64');
+        
+        // จำกัดขนาดที่ 5MB
+        const maxSize = 5 * 1024 * 1024;
+        if (fileSize > maxSize) {
+            return res.status(400).json({
+                success: false,
+                message: 'ไฟล์รูปภาพมีขนาดใหญ่เกินไป (สูงสุด 5MB)'
+            });
+        }
+
         // แปลง base64 เป็น buffer
-        const imageBuffer = Buffer.from(imageBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+        const imageBuffer = Buffer.from(base64WithoutPrefix, 'base64');
 
         // อัพเดทข้อมูลผู้ใช้
         const user = await User.findByIdAndUpdate(

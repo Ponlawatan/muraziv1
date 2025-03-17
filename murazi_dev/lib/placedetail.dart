@@ -3,7 +3,6 @@ import 'package:murazi_dev/models/place.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:murazi_dev/services/favorite_service.dart';
 import 'package:murazi_dev/favorite.dart';
-import 'package:murazi_dev/screens/place_by_province_screen.dart';
 
 class PlaceDetailPage extends StatefulWidget {
   final Place place;
